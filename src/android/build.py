@@ -265,7 +265,7 @@ class PlatformTarget(object):
         """Shortcut for the whole process until dexing into a code
         object that we can pack into an APK.
 
-        For directories that you do not specifiy a tenmporary directory
+        For directories that you do not specifiy a temporary directory
         will be used and deleted after the build.
         """
         to_delete = []
@@ -371,7 +371,7 @@ class PlatformTarget(object):
             # Return a new APK.
             return Apk(self, outfile)
 
-
+#return either the most recent or the requested platform
 def get_platform(sdk_path, ndk_dir, target=None):
     """Return path and filename information for the given SDK target.
 
@@ -384,12 +384,12 @@ def get_platform(sdk_path, ndk_dir, target=None):
     platforms = filter(lambda p: path.isdir(p),
                        map(lambda e: path.join(sdk_path, 'platforms', e),
                            os.listdir(path.join(sdk_path, 'platforms'))))
-    # Gives us a dict like {'10': '/sdk/platforms/android-10'}
-    platforms = dict([(p.rsplit('-', 1)[1], p) for p in platforms])
+    # Gives us a dict like {10: '/sdk/platforms/android-10'}
+    platforms = dict([(int(p.rsplit('-', 1)[1]), p) for p in platforms])
 
     if not target:
-        # Use the latest target - Python string sorting is smart
-        # enough here to do the right thing.
+        # Use the latest target - Python string sorting fails on Windows
+        # Fortunately, our keys have been converted to integers.
         target = sorted(platforms.keys())[-1]
 
     try:
