@@ -393,7 +393,7 @@ def get_platform(sdk_path, ndk_dir, target=None):
         target = sorted(platforms.keys())[-1]
 
     try:
-        target_root = platforms[target]
+        target_root = platforms[int(target)]
     except KeyError:
         raise ValueError('target "%s" not found in "%s"' % (
             target, sdk_path))
