@@ -24,8 +24,8 @@ from build import AndroidProject, ProgramFailedError, LOGGER_NAME
 def main(argv):
      scriptname = path.basename(sys.argv[0])
      if len(argv) != 1:
-          print "Builds the Android project in the current directory."
-          print "Usage: %s PATH_TO_SDK" % scriptname
+          print ("Builds the Android project in the current directory.")
+          print ("Usage: %s PATH_TO_SDK" % scriptname)
           return 1
 
      # Setup logging
@@ -40,24 +40,24 @@ def main(argv):
 
           keystore = path.expanduser('~/.android/debug.keystore')
           if path.exists(keystore):
-               print "Signing with debug key..."
+               print ("Signing with debug key...")
                apk.sign(keystore, 'androiddebugkey', 'android')
                apk.align()
           else:
-               print "Note: Package will be unsigned!"
+               print ("Note: Package will be unsigned!")
 
-          print "Created: %s" % apk.filename
-     except ProgramFailedError, e:
-          print u"ERROR: %s" % unicode(e)
+          print ("Created: %s" % apk.filename)
+     except ProgramFailedError as e:
+          print ("ERROR: {0}".format(unicode(e)))
           print
           if e.stdout:
-               print "STDOUT"
-               print "------"
-               print e.stdout
+               print ("STDOUT")
+               print ("------")
+               print (e.stdout)
           if e.stderr:
-               print "STDERR"
-               print "------"
-               print e.stderr
+               print ("STDERR")
+               print ("------")
+               print (e.stderr)
 
 
 def run():

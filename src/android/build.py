@@ -22,7 +22,7 @@ import shutil
 import tempfile
 import logging
 
-from tools import *
+from android.tools import *
 
 
 __all__ = ('AndroidProject', 'PlatformTarget', 'get_platform',
@@ -424,7 +424,7 @@ def mkdir(directory, recursive=False):
 
 def only_existing(paths):
     """Return only those paths that actually exists."""
-    return filter(lambda p: path.exists(p), paths)
+    return list(filter(lambda p: path.exists(p), paths))
 
 
 def as_list(o):

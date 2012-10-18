@@ -39,7 +39,7 @@ class ProgramFailedError(RuntimeError):
         return self.__str__()
 
     def __unicode__(self):
-        return u'%s failed with code %s' % (
+        return '{0} failed with code {1}'.format(
             self.cmdline, self.returncode)
 
     def __str__(self):
