@@ -518,23 +518,14 @@ class AndroidProject(object):
         # project directory needed for library project dependecies
         if project_dir != None:
             # get project path
-            f = open(os.path.join(project_dir,"project.properties"))
+            f = open(os.path.join(self.project_dir, "project.properties"))
             lines = f.readlines()
-
-            # workspace dir
-            fs = project_dir.split("/")
-            fs.pop()
-
-            workspace_path = "/"
-            
-            for fn in fs:
-                workspace_path = os.path.join(workspace_path,fn)
 
             # search for library projects in project.properties
             for line in lines:
                 if line.startswith("android.library"):
                     lname = line.split("/")[-1].rstrip()
-                    library_project = os.path.join(workspace_path, lname)
+                    library_project = os.path.join(self.project_dir, lname)
 
                     self.extra_source_dirs.append(os.path.join(library_project,"src"))
                     self.extra_jars.append( os.path.join(library_project,"libs") )
