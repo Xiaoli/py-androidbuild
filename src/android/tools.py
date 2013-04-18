@@ -262,8 +262,8 @@ class Dx(Program):
         """
         files
             A set of class files, .zip/.jar/.apk archives or
-            directories.q
-
+            directories.
+            
         output
             Target output file (--output).
         """

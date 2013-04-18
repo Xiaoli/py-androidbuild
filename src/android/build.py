@@ -168,7 +168,7 @@ class PlatformTarget(object):
         files_list = list()
         for filename in recursive_glob(source_dirs, '*.rs'):
             files_list.append(filename)
-        #don't try to build renderscript if there is no rs files
+        # don't try to build renderscript if there is no rs files
         if len(files_list) <= 0:
             return
         log.info(self.llvmRs(
@@ -204,7 +204,7 @@ class PlatformTarget(object):
         return jar_files
 
     def compile_java(self, source_dirs, output_dir, extra_jars=[],
-                     debug=False, target='1.5'):
+                     debug=False, target='1.6'):
         """Compile all *.java files in ``source_dirs`` (a list of
         directories) and store the class files in ``output_dir``.
 
@@ -379,7 +379,7 @@ def get_platform(sdk_path, target=None, ndk_dir=None):
 
     If no target is given, the most recent target is chosen.
     """
-    #check ig sdk folder contains platforms folder
+    # check ig sdk folder contains platforms folder
     if path.exists(path.join(sdk_path, 'platforms')) == False:
         raise ValueError("sdk path is wrong")
 
@@ -515,13 +515,13 @@ class AndroidProject(object):
         self.extra_jars = []
         self.extra_resource_dirs = []
 
-        #project directory needed for library project dependecies
+        # project directory needed for library project dependecies
         if project_dir != None:
-            #get project path
+            # get project path
             f = open(os.path.join(project_dir,"project.properties"))
             lines = f.readlines()
 
-            #workspace dir
+            # workspace dir
             fs = project_dir.split("/")
             fs.pop()
 
@@ -530,15 +530,15 @@ class AndroidProject(object):
             for fn in fs:
                 workspace_path = os.path.join(workspace_path,fn)
 
-            #search for library projects in project.properties
+            # search for library projects in project.properties
             for line in lines:
                 if line.startswith("android.library"):
                     lname = line.split("/")[-1].rstrip()
                     library_project = os.path.join(workspace_path, lname)
 
-                    self.extra_source_dirs.append( os.path.join(library_project,"src") )
+                    self.extra_source_dirs.append(os.path.join(library_project,"src"))
                     self.extra_jars.append( os.path.join(library_project,"libs") )
-                    self.extra_resource_dirs.append( os.path.join(library_project,"res") )
+                    self.extra_resource_dirs.append(os.path.join(library_project,"res"))
 
         # if no name is given, inspect the manifest
         self.name = name or self.manifest_parsed.attrib['package']
