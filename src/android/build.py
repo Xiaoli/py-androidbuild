@@ -268,6 +268,7 @@ class PlatformTarget(object):
         For directories that you do not specifiy a tenmporary directory
         will be used and deleted after the build.
         """
+        
         to_delete = []
         if not source_gen_dir:
             source_gen_dir = tempfile.mkdtemp()
@@ -308,6 +309,7 @@ class PlatformTarget(object):
         if not output:
             _, output = tempfile.mkstemp(suffix='.ap_')
         output = path.abspath(output)
+        
         kwargs = dict(
             command='package',
             manifest=manifest,
@@ -372,7 +374,7 @@ class PlatformTarget(object):
             return Apk(self, outfile)
 
 
-def get_platform(sdk_path, ndk_dir, target=None):
+def get_platform(sdk_path, target=None, ndk_dir=None):
     """Return path and filename information for the given SDK target.
 
     If no target is given, the most recent target is chosen.
@@ -504,13 +506,39 @@ class AndroidProject(object):
             if target is None:
                 target = self.manifest_parsed.find('uses-sdk')\
                     .attrib['{http://schemas.android.com/apk/res/android}targetSdkVersion']
-            platform = get_platform(sdk_dir, ndk_dir, target)
+            platform = get_platform(sdk_dir, ndk_dir=ndk_dir, target=target)
 
         self.platform = platform
 
         # Optional values
         self.extra_source_dirs = []
         self.extra_jars = []
+        self.extra_resource_dirs = []
+
+        #project directory needed for library project dependecies
+        if project_dir != None:
+            #get project path
+            f = open(os.path.join(project_dir,"project.properties"))
+            lines = f.readlines()
+
+            #workspace dir
+            fs = project_dir.split("/")
+            fs.pop()
+
+            workspace_path = "/"
+            
+            for fn in fs:
+                workspace_path = os.path.join(workspace_path,fn)
+
+            #search for library projects in project.properties
+            for line in lines:
+                if line.startswith("android.library"):
+                    lname = line.split("/")[-1].rstrip()
+                    library_project = os.path.join(workspace_path, lname)
+
+                    self.extra_source_dirs.append( os.path.join(library_project,"src") )
+                    self.extra_jars.append( os.path.join(library_project,"libs") )
+                    self.extra_resource_dirs.append( os.path.join(library_project,"res") )
 
         # if no name is given, inspect the manifest
         self.name = name or self.manifest_parsed.attrib['package']
@@ -530,7 +558,7 @@ class AndroidProject(object):
             manifest=self.manifest,
             project_dir = self.project_dir,
             source_dirs=[self.source_dir] + self.extra_source_dirs,
-            resource_dir=self.resource_dir,
+            resource_dir=[self.resource_dir] + self.extra_resource_dirs,
             source_gen_dir=self.gen_dir,
             class_gen_dir=path.join(self.out_dir, 'classes'),
             extra_jars=only_existing([self.lib_dir])+self.extra_jars
@@ -558,7 +586,7 @@ class AndroidProject(object):
                 self.out_dir, '%s.%s.ap_' % (self.name, config))
         kwargs = dict(
             manifest=self.manifest,
-            resource_dir=self.resource_dir,
+            resource_dir=[self.resource_dir] + self.extra_resource_dirs,
             configurations=config,
             output=resource_filename,
             package_name=package_name,

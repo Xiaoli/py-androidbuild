@@ -16,6 +16,7 @@ limitations under the License.
 
 import sys
 import subprocess
+import collections
 
 
 __all__ = ('ProgramFailedError', 'Aapt', 'Aidl', 'LlvmRs', 'ApkBuilder',
@@ -72,7 +73,8 @@ class Program(object):
         along to their caller.
         """
         cmdline = " ".join([self.executable] + arguments)
-        process = subprocess.Popen([self.executable] + arguments,shell=True if sys.platform=="win32" else False,
+        process = subprocess.Popen([self.executable] + arguments, 
+                                   shell=True if sys.platform=="win32" else False,
                                    stderr=subprocess.PIPE,
                                    stdout=subprocess.PIPE)
         process.wait()
@@ -124,7 +126,10 @@ class Aapt(Program):
         args = [command]
         self.extend_args(args, ['-m'], make_dirs)
         self.extend_args(args, ['-M', manifest])
-        self.extend_args(args, ['-S', resource_dir])
+        
+        for item in resource_dir:
+            self.extend_args(args, ['-S', item])
+
         self.extend_args(args, ['-A', asset_dir])
         self.extend_args(args, ['-c', configurations])
         if overwrite_version_code:
@@ -138,6 +143,9 @@ class Aapt(Program):
         self.extend_args(args, ['-F', apk_output])
         self.extend_args(args, ['-J', r_output])
         self.extend_args(args, ['-f'], overwrite)
+        self.extend_args(args, ["--auto-add-overlay"])
+        self.extend_args(args, ["--no-crunch"])
+        
         return Program.__call__(self, args)
 
 
@@ -192,6 +200,7 @@ class NdkBuild(Program):
         """
         args = []
         self.extend_args(args, ["-C", project_path])
+        
         return Program.__call__(self, args)
 
 class NdkClean(Program):
@@ -253,12 +262,33 @@ class Dx(Program):
         """
         files
             A set of class files, .zip/.jar/.apk archives or
-            directories.
+            directories.q
 
         output
             Target output file (--output).
         """
         args = ['--dex']
+        
+        jar_list = []
+        for item in files:
+            if item.endswith(".jar"):
+                fname = item.split('/')
+                fname = fname[-1]
+
+                jar_list.append(fname)
+
+        counter_list = collections.Counter(jar_list)
+        repeated_elements = [i for i in counter_list if counter_list[i] > 1]
+
+        for jar in files:
+            fname = jar.split("/")
+            fname = fname[-1]
+
+            for item in repeated_elements:
+                if item == fname:
+                    files.remove(jar)
+                    repeated_elements.remove(item)
+
         self.extend_args(args, ["--output=%s" % output])
         args.extend(files)
         return Program.__call__(self, args)
